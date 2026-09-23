@@ -20,6 +20,30 @@ class BackendApplicationTests {
     @Autowired MockMvc mvc;
     @Autowired ProductRepository products;
 
+    @Test void localListWorksWithoutQuery() throws Exception {
+        mvc.perform(get("/api/catalog/products")).andExpect(status().isOk())
+            .andExpect(jsonPath("$.items").isArray());
+    }
+    @Test void searchWorksWithoutEkt() throws Exception {
+        mvc.perform(get("/api/products/search").param("q","unmatched-search-value"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items").isEmpty())
+            .andExpect(jsonPath("$.totalElements").value(0));
+    }
+    @Test void searchValidatesParameters() throws Exception {
+        for (String query : new String[]{"", "   ", "x".repeat(201), "a b c d e f g h i j k"})
+            mvc.perform(get("/api/products/search").param("q",query)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/products/search")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/products/search").param("q","abc").param("page","-1")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/products/search").param("q","abc").param("size","101")).andExpect(status().isBadRequest());
+    }
+    @Test void productsRequireConfiguration() throws Exception {
+        mvc.perform(get("/api/products/515291")).andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("EKT_DISABLED"));
+    }
+    @Test void invalidProductParameters() throws Exception {
+        mvc.perform(get("/api/products?page=0")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/products/-1")).andExpect(status().isBadRequest());
+    }
     @Test void health() throws Exception {
         mvc.perform(get("/api/health")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("ok"));
     }

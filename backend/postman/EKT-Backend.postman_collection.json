@@ -1,0 +1,776 @@
+{
+  "info": {
+    "_postman_id": "90d71120-3679-4c13-8fd2-964aa4facc8c",
+    "name": "EKT Backend — последовательная проверка",
+    "description": "Реальные маршруты Spring Boot. Запускайте целиком через Collection Runner, 1 iteration. Создаётся отдельная локальная корзина, заказ EKT не оформляется. sessionId — возвращённый Bearer token, не UUID базы. Не экспортируйте заполненные токены. Недоступные положительные сценарии явно отмечаются SKIPPED. requireLlm/requireVerifiedTerms/requireAnalogs=true переводят их в обязательные проверки.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "quantity",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "analogProductId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "requireAnalogs",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "requireVerifiedTerms",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "requireLlm",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proposalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proposalRevision",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "article",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "articleEncoded",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "stock",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "excessQuantity",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "proposalRequestId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId1",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messageId2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "confirmed",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chatSessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "snapshot",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "llmAvailable",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Health приложения",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "['sessionId','proposalId','proposalRevision','confirmed','article','articleEncoded','stock','excessQuantity','proposalRequestId','messageId1','messageId2','llmAvailable','chatSessionId','snapshot'].forEach(k => pm.collectionVariables.set(k, ''));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Приложение работает\", () => pm.expect(b.status).to.equal('ok'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Health PostgreSQL",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health",
+        "description": "Actuator настроен show-details=never. UP проверяет общий health с DataSource, но не раскрывает components.db. Следующий запрос дополнительно читает PostgreSQL."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Health UP (включая настроенный индикатор БД)\", () => pm.expect(b.status).to.equal('UP'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Список из PostgreSQL и выбор товара",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/catalog/products?page=0&size=100",
+        "description": "productId можно задать заранее. Если пустой, выбирается доступный товар из первых 100 сохранённых записей. Новая сессия будет создана позже."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test(\"Непустой импортированный каталог\", () => {pm.expect(b.items).to.be.an('array').that.is.not.empty; pm.expect(b.totalElements).to.be.above(0);});",
+              "let productId = pm.variables.get('productId');",
+              "const selected = productId ? b.items.find(x => String(x.id) === String(productId)) : b.items.find(x => x.quantity !== null && Number(x.quantity) > 0 && x.price !== null && x.article);",
+              "if (!productId && selected) {productId = String(selected.id);pm.collectionVariables.set('productId', productId);}",
+              "if (!productId) {pm.test('Нужен доступный товар; импортируйте каталог или задайте productId',()=>pm.expect.fail('Нет подходящего товара'));pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Сохранённая карточка и артикул",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/catalog/products/{{productId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Совпадает ID и сохранён артикул',()=>{pm.expect(String(b.product.id)).to.equal(String(pm.variables.get('productId')));pm.expect(b.product.article).to.be.a('string').that.is.not.empty;});",
+              "pm.collectionVariables.set('article', b.product.article);",
+              "pm.collectionVariables.set('articleEncoded', encodeURIComponent(b.product.article));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Поиск точного артикула",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/products/search?q={{articleEncoded}}&page=0&size=20",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Найден выбранный товар',()=>pm.expect(b.items.some(x=>String(x.id)===String(pm.variables.get('productId')))).to.equal(true));",
+              "pm.test('Точный артикул ранжируется первым',()=>pm.expect(b.items[0].article.toLowerCase()).to.equal(String(pm.variables.get('article')).toLowerCase()));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Свежая карточка EKT и количество",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/products/{{productId}}",
+        "description": "Проверяет реальный EKT API. Если цена или остаток недоступны, тест падает, а не подменяет данные. quantity можно задать явно; иначе берётся KRATNOST_MIN либо 1, как для демонстрационного товара."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Карточка EKT доступна для покупки',()=>{pm.expect(String(b.id)).to.equal(String(pm.variables.get('productId')));pm.expect(b.price).to.be.a('number').at.least(0);pm.expect(b.quantity).to.be.a('number').above(0);});",
+              "const step = b.properties && b.properties.KRATNOST_MIN != null ? Number(String(b.properties.KRATNOST_MIN).replace(',', '.')) : 1;",
+              "if (!pm.variables.get('quantity')) pm.collectionVariables.set('quantity', String(step));",
+              "pm.test('Количество соответствует остатку и кратности',()=>{const q=Number(pm.variables.get('quantity'));pm.expect(Number.isFinite(step) && step>0).to.equal(true);pm.expect(q).to.be.above(0).and.at.most(Number(b.quantity));pm.expect(Math.abs(q/step-Math.round(q/step))).to.be.below(1e-7);});",
+              "pm.collectionVariables.set('stock',String(b.quantity));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Аналоги и объяснение",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/products/{{analogProductId}}/analogs",
+        "description": "Пустая выдача допустима для конфликтных/неполных характеристик, но не считается успешной проверкой положительного подбора. requireAnalogs=true требует минимум один результат."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.variables.get('analogProductId')) pm.collectionVariables.set('analogProductId',pm.variables.get('productId'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Есть список и объяснение результата',()=>{pm.expect(b.items).to.be.an('array');pm.expect(b.message).to.be.a('string').that.is.not.empty;});",
+              "if (b.items.length) {",
+              " pm.test('Каждый аналог объяснён',()=>b.items.forEach(x=>{pm.expect(x.explanation).to.be.a('string').that.is.not.empty;pm.expect(x.matchedCharacteristics).to.be.an('array').that.is.not.empty;pm.expect(x.product.product.quantity).to.be.above(0);}));",
+              "} else if(String(pm.variables.get('requireAnalogs'))==='true') {",
+              " pm.test('Есть хотя бы один аналог',()=>pm.expect.fail('В выборке нет совместимых кандидатов'));",
+              "} else {pm.test.skip('НЕ ПРОВЕРЕНО: положительный подбор аналогов — нет кандидатов в текущей выборке',()=>{});}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Создать сессию",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/session",
+        "description": "В API нет публичного sessionId UUID: переменная sessionId хранит возвращённый token и передаётся в Authorization. Новый токен получается при каждом запуске."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Получен Bearer-токен, сессия не истекла',()=>{pm.expect(b.token).to.be.a('string').that.is.not.empty;pm.expect(b.tokenType).to.equal('Bearer');pm.expect(Date.parse(b.expiresAt)).to.be.above(Date.now());});",
+              "pm.collectionVariables.set('sessionId', b.token);",
+              "pm.collectionVariables.set('chatSessionId', b.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Корзина новой сессии пуста",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('Пустая корзина',()=>pm.expect(b.items).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Предложить добавление",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{proposalRequestId}}\",\"productId\":{{productId}},\"quantity\":{{quantity}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('proposalRequestId', pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Предложение ожидает подтверждения',()=>{pm.expect(b.status).to.equal('PENDING');pm.expect(String(b.productId)).to.equal(String(pm.variables.get('productId')));pm.expect(Number(b.quantity)).to.equal(Number(pm.variables.get('quantity')));pm.expect(b.revision).to.be.at.least(1);});",
+              "pm.collectionVariables.set('proposalId',b.id);pm.collectionVariables.set('proposalRevision',String(b.revision));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. До подтверждения корзина не меняется",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test('Предложение не добавило товар',()=>pm.expect(b.items).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Явное подтверждение",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals/{{proposalId}}/confirm",
+        "description": "Запуск коллекции означает явное подтверждение первоначального предложения в LOCAL_DEMO. При изменении условий Runner останавливается: новая ревизия не подтверждается автоматически.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"revision\":{{proposalRevision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "if(b.requiresConfirmation) {",
+              " pm.collectionVariables.set('proposalRevision',String(b.proposal.revision));",
+              " pm.test('Изменение условий не меняет корзину',()=>{pm.expect(b.added).to.equal(false);pm.expect(b.cart.items).to.have.lengthOf(0);});",
+              " pm.test('Нужно вручную проверить новые условия и повторить шаг 12',()=>pm.expect.fail('Цена/остаток изменились. Автоподтверждение новой ревизии отключено.'));",
+              " pm.execution.setNextRequest(null);",
+              "} else {",
+              " pm.test('Товар добавлен в нужном количестве',()=>{pm.expect(b.added).to.equal(true);pm.expect(b.proposal.status).to.equal('CONFIRMED');pm.expect(b.cart.items).to.have.lengthOf(1);pm.expect(String(b.cart.items[0].productId)).to.equal(String(pm.variables.get('productId')));pm.expect(Number(b.cart.items[0].quantity)).to.equal(Number(pm.variables.get('quantity')));});",
+              " pm.collectionVariables.set('confirmed','true');",
+              " pm.collectionVariables.set('snapshot',JSON.stringify(b.cart.items));",
+              " pm.test('Есть ссылка на локальную корзину',()=>pm.expect(b.cart.cartUrl).to.match(/^https?:\\/\\/.+\\/cart$/));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Повторное подтверждение без дубля",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals/{{proposalId}}/confirm",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"revision\":{{proposalRevision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Результат идемпотентен',()=>{pm.expect(b.added).to.equal(true);pm.expect(b.requiresConfirmation).to.equal(false);pm.expect(b.cart.items).to.deep.equal(JSON.parse(pm.variables.get('snapshot')));});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Обновить остаток перед отрицательным тестом",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/products/{{productId}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Остаток известен',()=>pm.expect(b.quantity).to.be.a('number').at.least(0));",
+              "pm.collectionVariables.set('excessQuantity',String(Math.floor(Number(b.quantity))+1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Количество сверх остатка отклоняется",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals",
+        "description": "Количество вычисляется из свежего остатка. Если остаток изменится между запросами, проверка должна упасть; повторите сценарий. Ошибки EKT не считаются успешным отклонением количества.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"productId\":{{productId}},\"quantity\":{{excessQuantity}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409',()=>pm.response.to.have.status(409));",
+              "const b=pm.response.json();",
+              "pm.test('Причина именно INSUFFICIENT_STOCK',()=>pm.expect(b.code).to.equal('INSUFFICIENT_STOCK'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Итоговая корзина не изменилась",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test(\"Корзина содержит ровно выбранное количество\", () => {",
+              " const rows = b.items.filter(x => String(x.productId) === String(pm.variables.get('productId')));",
+              " pm.expect(rows).to.have.lengthOf(1);",
+              " pm.expect(Number(rows[0].quantity)).to.equal(Number(pm.variables.get('quantity')));",
+              " pm.expect(b.items).to.have.lengthOf(1);",
+              "});",
+              "",
+              "pm.test('Отказ не изменил состав и цену',()=>pm.expect(b.items).to.deep.equal(JSON.parse(pm.variables.get('snapshot'))));",
+              "pm.test('Это локальная корзина без резерва',()=>{pm.expect(b.mode).to.equal('LOCAL_DEMO');pm.expect(b.stockReserved).to.equal(false);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Условия покупки",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/purchase-terms",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "",
+              "pm.test('Контракт условий',()=>{pm.expect(b.verified).to.be.a('boolean');['payment','delivery','minimumOrder'].forEach(k=>pm.expect(b[k]).to.be.a('string').that.is.not.empty);});",
+              "if(b.verified) {pm.test('Утверждённый источник указан',()=>pm.expect(b.source).to.be.a('string').that.is.not.empty);}",
+              "else if(String(pm.variables.get('requireVerifiedTerms'))==='true') {pm.test('Условия утверждены',()=>pm.expect.fail('Утверждённые условия не настроены'));}",
+              "else {pm.test.skip('НЕ ПРОВЕРЕНО: утверждённые условия оплаты/доставки отсутствуют',()=>{});}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Чат с LLM — первый вопрос",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/chat",
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"messageId\":\"{{messageId1}}\",\"text\":\"Покажи карточку товара с ID {{productId}}, его цену и остаток.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('messageId1',pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const b=pm.response.json();",
+              "pm.test('Используется та же сессия',()=>pm.expect(pm.variables.get('sessionId')).to.equal(pm.variables.get('chatSessionId')));",
+              "if(pm.response.code===503 && b.code==='LLM_NOT_CONFIGURED') {",
+              " pm.collectionVariables.set('llmAvailable','false');",
+              " pm.test('Отсутствие LLM настроек сообщается явно',()=>pm.expect(b.code).to.equal('LLM_NOT_CONFIGURED'));",
+              " if(String(pm.variables.get('requireLlm'))==='true') pm.test('LLM подключена',()=>pm.expect.fail('Нужны LLM_API_KEY и LLM_MODEL'));",
+              " else pm.test.skip('НЕ ПРОВЕРЕНО: ответ реальной LLM — нет настроек',()=>{});",
+              "} else {",
+              " pm.test('Ответ чата HTTP 200',()=>pm.response.to.have.status(200));",
+              " pm.test('Есть текст ответа и ID сообщения',()=>{pm.expect(b.text).to.be.a('string').that.is.not.empty;pm.expect(b.messageId).to.equal(pm.variables.get('messageId1'));});",
+              " pm.test('Модель выбрала указанную карточку',()=>pm.expect(String(b.data.id)).to.equal(String(pm.variables.get('productId'))));",
+              " pm.collectionVariables.set('llmAvailable','true');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Чат — продолжение той же сессии",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/chat",
+        "description": "В успешном ответе data.id должен совпасть с первым вопросом. При отсутствии LLM оба запроса проверяют явный 503, а не имитируют диалог.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"messageId\":\"{{messageId2}}\",\"text\":\"Какой остаток у этого же товара? Покажи его карточку ещё раз.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('messageId2',pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const b=pm.response.json();",
+              "pm.test('Используется та же сессия',()=>pm.expect(pm.variables.get('sessionId')).to.equal(pm.variables.get('chatSessionId')));",
+              "if(pm.response.code===503 && b.code==='LLM_NOT_CONFIGURED') {",
+              " pm.collectionVariables.set('llmAvailable','false');",
+              " pm.test('Отсутствие LLM настроек сообщается явно',()=>pm.expect(b.code).to.equal('LLM_NOT_CONFIGURED'));",
+              " if(String(pm.variables.get('requireLlm'))==='true') pm.test('LLM подключена',()=>pm.expect.fail('Нужны LLM_API_KEY и LLM_MODEL'));",
+              " else pm.test.skip('НЕ ПРОВЕРЕНО: ответ реальной LLM — нет настроек',()=>{});",
+              "} else {",
+              " pm.test('Ответ чата HTTP 200',()=>pm.response.to.have.status(200));",
+              " pm.test('Есть текст ответа и ID сообщения',()=>{pm.expect(b.text).to.be.a('string').that.is.not.empty;pm.expect(b.messageId).to.equal(pm.variables.get('messageId2'));});",
+              " pm.test('Модель выбрала указанную карточку',()=>pm.expect(String(b.data.id)).to.equal(String(pm.variables.get('productId'))));",
+              " pm.collectionVariables.set('llmAvailable','true');",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

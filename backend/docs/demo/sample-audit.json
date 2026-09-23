@@ -1,0 +1,621 @@
+{
+  "sampleSize": 100,
+  "outOfStockCount": 52,
+  "outOfStockAudit": [
+    {
+      "id": 45357,
+      "article": "ярп4520",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 25397,
+      "article": "310100080_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 19988,
+      "article": "151000197_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 25010,
+      "article": "151000198_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35604,
+      "article": "RM35BA10",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35819,
+      "article": "RM17UAS16",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35587,
+      "article": "RM17UBE16",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35563,
+      "article": "RM17UAS15",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35574,
+      "article": "RM17UBE15",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35585,
+      "article": "RM17UAS14",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35609,
+      "article": "RM35UA12MW",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35608,
+      "article": "RM35UA11MW",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35610,
+      "article": "RM35UA13MW",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35599,
+      "article": "RM22UA31MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35573,
+      "article": "RM22UA33MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35601,
+      "article": "RM22UA33MT",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35600,
+      "article": "RM22UA32MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35581,
+      "article": "RM22UB34",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35598,
+      "article": "RM22UA23MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35596,
+      "article": "RM22UA21MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35597,
+      "article": "RM22UA22MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35589,
+      "article": "RM22JA31MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35572,
+      "article": "RM35JA32MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35818,
+      "article": "RM35JA32MW",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35568,
+      "article": "RM35JA31MW",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 35588,
+      "article": "RM22JA21MR",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 18945,
+      "article": "030300017_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST"
+      ]
+    },
+    {
+      "id": 54323,
+      "article": "11006DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 54345,
+      "article": "11122DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 54342,
+      "article": "11125DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 54341,
+      "article": "11127DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 54340,
+      "article": "11129DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 54339,
+      "article": "11130DEK",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21182,
+      "article": "310100024_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21185,
+      "article": "310100028_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24160,
+      "article": "310100084_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 18157,
+      "article": "310100086_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 25139,
+      "article": "310100033_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24164,
+      "article": "310100081_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21049,
+      "article": "310100082_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21190,
+      "article": "010400056_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21191,
+      "article": "010400060_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 18159,
+      "article": "010400061_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24163,
+      "article": "010400122_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 18160,
+      "article": "010400123_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24165,
+      "article": "010400079_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24167,
+      "article": "010400067_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 23180,
+      "article": "010400068_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 24166,
+      "article": "010400069_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 21192,
+      "article": "150100707_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 22183,
+      "article": "150100704_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    },
+    {
+      "id": 18161,
+      "article": "150100708_",
+      "quantity": 0,
+      "missingRequiredFields": [
+        "OBYEM",
+        "KOLICHESTVO_POLYUSOV",
+        "NOMINALNOE_NAPRYAZHENIE",
+        "NOMINALNYY_TOK",
+        "NOMINALNAYA_OTKLYUCHAYUSHCHAYA_SPOSOBNOST",
+        "TIP_USTANOVKI"
+      ]
+    }
+  ]
+}

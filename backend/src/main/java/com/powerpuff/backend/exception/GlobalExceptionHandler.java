@@ -10,6 +10,19 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler(com.powerpuff.backend.commerce.BusinessException.class)
+    public ProblemDetail handleBusiness(com.powerpuff.backend.commerce.BusinessException ex) {
+        var p=ProblemDetail.forStatusAndDetail(ex.status,ex.getMessage());
+        p.setProperty("code",ex.code);
+        return p;
+    }
+    @ExceptionHandler(EktException.class)
+    public ProblemDetail handleEkt(EktException ex) {
+        var problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+        problem.setProperty("code", ex.getCode());
+        return problem;
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail handleNotFound(NotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Resource not found");

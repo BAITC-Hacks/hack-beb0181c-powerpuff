@@ -1,0 +1,360 @@
+{
+  "info": {
+    "name": "EKT — отсутствующий товар и честный подбор аналога",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Реальные ID на 2026-09-23. Подтверждённого доступного аналога в выборке нет. Пустой подбор не считается успехом положительного сценария. Два запроса используют реальную LLM. Запуск целиком, одна итерация."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "unavailableProductId",
+      "value": "21182",
+      "type": "string"
+    },
+    {
+      "key": "comparisonProductId",
+      "value": "33703",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Новая сессия",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/session",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200',()=>pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('sessionId',pm.response.json().token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Статус выборки",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/catalog/status",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Артикул не найден",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products/search?q=EKT_DEMO_MISSING_20260923_7E3C&page=0&size=20",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Нет результатов',()=>pm.expect(b.items).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. ID не найден в локальной БД",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/catalog/products/9223372036854775807",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404',()=>pm.response.to.have.status(404));",
+              "const b=pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Реальный нулевой остаток",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products/{{unavailableProductId}}",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Остаток 0',()=>pm.expect(b.quantity).to.equal(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Сохранённая карточка",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/catalog/products/{{unavailableProductId}}",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Подбор с объяснением отказа",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products/{{unavailableProductId}}/analogs",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Без недоказанной замены',()=>{pm.expect(b.items).to.have.lengthOf(0);pm.expect(b.message).to.be.a('string').that.is.not.empty;});",
+              "pm.test.skip('НЕ ЗАКРЫТО: доступный совместимый аналог не найден',()=>{});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Запрет добавления отсутствующего товара",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/cart/proposals",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\": \"{{$guid}}\", \"productId\": {{unavailableProductId}}, \"quantity\": 1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409',()=>pm.response.to.have.status(409));",
+              "const b=pm.response.json();",
+              "pm.test('INSUFFICIENT_STOCK',()=>pm.expect(b.code).to.equal('INSUFFICIENT_STOCK'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Корзина осталась пустой",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/cart",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Пустая корзина',()=>pm.expect(b.items).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Доступный товар для сравнения — НЕ доказанный аналог",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products/{{comparisonProductId}}",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Остаток положительный',()=>pm.expect(b.quantity).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Карточка с конфликтом 160/250 А",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/catalog/products/515291",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test.skip('ИЗВЕСТНЫЙ ДЕФЕКТ: конфликт 160/250 А не попал в warnings',()=>{});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Чат: нет в наличии",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/chat",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"messageId\": \"{{$guid}}\", \"text\": \"Покажи карточку товара ID {{unavailableProductId}} и его остаток.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('LLM вернула нужный товар без остатка',()=>{pm.expect(String(b.data.id)).to.equal(pm.variables.get('unavailableProductId'));pm.expect(b.data.quantity).to.equal(0);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Чат: аналог того же товара",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/chat",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"messageId\": \"{{$guid}}\", \"text\": \"Подбери доступный аналог этого же товара. Совместимость обоснуй характеристиками, не названием и не RECOMMEND.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('LLM не выдумала замену',()=>{pm.expect(b.data.items).to.have.lengthOf(0);pm.expect(b.data.message).to.be.a('string').that.is.not.empty;});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

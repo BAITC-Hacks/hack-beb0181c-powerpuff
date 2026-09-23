@@ -2,7 +2,7 @@
 
 Hackathon team repository for Powerpuff.
 
-> **Идея в одном предложении:** _TODO — какую проблему решаем и для кого._
+> Backend консультанта EKT: каталог электротехники, поиск и корзина с явным подтверждением.
 
 ## Демо
 
@@ -106,8 +106,15 @@ npm run dev
 
 ## API
 
+Контракт чата, сессий и корзины: [backend/docs/frontend-api.md](backend/docs/frontend-api.md).
+
+
 | Метод  | Путь              | Описание           |
 |--------|-------------------|--------------------|
+| GET    | `/api/products/search?q=Legrand&page=0&size=20` | Поиск в PostgreSQL |
+| GET    | `/api/catalog/status` | Статус загрузки каталога в PostgreSQL |
+| GET    | `/api/products?page=1` | Страница каталога напрямую из EKT |
+| GET    | `/api/products/{id}` | Карточка товара напрямую из EKT |
 | GET    | `/api/health`     | Проверка           |
 | GET    | `/api/items`      | Список             |
 | GET    | `/api/items/{id}` | Один элемент       |

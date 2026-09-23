@@ -1,2 +1,2 @@
-/** Внешние интеграции. EKT client будет реализован на следующем этапе. */
+/** HTTP-интеграция с каталогом EKT; внешние DTO отделены от REST DTO и сущностей. */
 package com.powerpuff.backend.client;
