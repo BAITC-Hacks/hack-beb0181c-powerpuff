@@ -1,0 +1,65 @@
+.top-bar {
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 15px;
+}
+
+.top-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 48px;
+}
+
+.top-bar__city {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+}
+
+.top-bar__nav {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  flex: 1;
+}
+
+.top-bar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.top-bar__link:hover,
+.top-bar__phones a:hover {
+  color: var(--color-accent);
+}
+
+.top-bar__phones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.top-bar__phones a {
+  display: block;
+}
+
+@media (max-width: 991px) {
+  .top-bar__nav {
+    display: none;
+  }
+
+  .top-bar__phones {
+    margin-left: auto;
+  }
+}
