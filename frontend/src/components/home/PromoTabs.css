@@ -1,0 +1,125 @@
+.promo {
+  padding-top: 64px;
+  padding-bottom: 60px;
+}
+
+.promo__tabs {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 28px;
+}
+
+.promo__tabs button {
+  padding: 0 0 6px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: #9a9a9a;
+  font-size: 28px;
+  font-weight: 700;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.promo__tabs button.is-active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-primary-dark);
+}
+
+.promo__body {
+  position: relative;
+}
+
+.promo__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.promo__track::-webkit-scrollbar {
+  display: none;
+}
+
+.promo__card {
+  position: relative;
+  flex: 0 0 20%;
+  min-width: 200px;
+  border: 1px solid var(--color-border);
+  border-right-width: 0;
+  scroll-snap-align: start;
+  transition: box-shadow 0.2s;
+}
+
+.promo__card:last-child {
+  border-right-width: 1px;
+}
+
+.promo__card:hover {
+  z-index: 1;
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.promo__card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 260 / 448;
+  object-fit: cover;
+}
+
+.promo__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58px;
+  height: 23px;
+  background: #d1d1d1;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 23px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.promo__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 28px;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.promo__arrow--prev {
+  left: -6px;
+}
+
+.promo__arrow--next {
+  right: -6px;
+}
+
+@media (max-width: 767px) {
+  .promo__tabs {
+    gap: 20px;
+  }
+
+  .promo__tabs button {
+    font-size: 20px;
+  }
+
+  .promo__card {
+    flex-basis: 50%;
+    min-width: 0;
+  }
+}

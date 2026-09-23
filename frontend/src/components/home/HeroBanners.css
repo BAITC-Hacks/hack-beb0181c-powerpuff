@@ -1,0 +1,155 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 958fr) minmax(0, 313fr);
+  gap: 20px;
+}
+
+.hero__main,
+.hero__side {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.hero__main {
+  aspect-ratio: 958 / 424;
+}
+
+.hero__side {
+  aspect-ratio: 313 / 424;
+}
+
+.hero__track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.6s ease;
+}
+
+.hero__slide {
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.hero__slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero__arrow {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--color-primary);
+  font-size: 32px;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.2s;
+}
+
+.hero__main:hover .hero__arrow,
+.hero__arrow:focus-visible {
+  opacity: 1;
+}
+
+.hero__arrow--prev {
+  left: 20px;
+}
+
+.hero__arrow--next {
+  right: 20px;
+}
+
+.hero__dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  gap: 10px;
+  transform: translateX(-50%);
+}
+
+.hero__dots button {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.hero__dots button.is-active {
+  background: var(--color-accent);
+}
+
+.hero__counter {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 6px;
+  color: var(--color-muted);
+  font-size: 18px;
+  transform: translateX(-50%);
+}
+
+.hero__counter button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--color-primary);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.hero__counter i {
+  position: absolute;
+  bottom: 0;
+  left: 44px;
+  height: 3px;
+  max-width: calc(100% - 88px);
+  background: var(--color-accent);
+  transition: width 0.3s;
+}
+
+@media (max-width: 767px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__side {
+    display: none;
+  }
+
+  .hero__arrow {
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+    font-size: 26px;
+  }
+
+  .hero__dots button {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__track {
+    transition: none;
+  }
+}
