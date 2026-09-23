@@ -18,3 +18,15 @@ backend/target/
 # --- Node / Frontend ---
 node_modules/
 frontend/dist/
+
+# --- Python / ML ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+ml/data/raw/*
+ml/data/processed/*
+ml/models/*
+!ml/**/.gitkeep

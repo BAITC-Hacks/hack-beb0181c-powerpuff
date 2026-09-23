@@ -20,6 +20,8 @@ spring:
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  ml:
+    url: ${ML_URL:http://localhost:8000}
 
 management:
   endpoints:
