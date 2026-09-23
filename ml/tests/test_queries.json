@@ -1,0 +1,26 @@
+[
+  {
+    "query": "трехфазный автомат Legrand 40 ампер",
+    "expected_id": 515279
+  },
+  {
+    "query": "Legrand автомат 3P 40A",
+    "expected_id": 515279
+  },
+  {
+    "query": "DRX125 40A",
+    "expected_id": 515279
+  },
+  {
+    "query": "автоматический выключатель Legrand 40А 3 полюса",
+    "expected_id": 515279
+  },
+  {
+    "query": "нужен Legrand DRX125 на 40 ампер",
+    "expected_id": 515279
+  },
+  {
+    "query": "автомат Legrand 3P 40A 400V 10kA",
+    "expected_id": 515279
+  }
+]

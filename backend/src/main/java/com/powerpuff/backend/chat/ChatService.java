@@ -47,8 +47,11 @@ public class ChatService {
                 var action=llm.route(text,history);
                 switch(action.action()) {
                     case "search" -> {data=search.search(action.query(),0,5);answer="Результаты поиска в загруженном каталоге. Уточните товар и количество.";}
-                    case "product" -> {var p=catalog.get(productId(action));data=p;answer=p.name()+". Цена: "+(p.price()==null?"не уточнена":p.price())+". Остаток по данным EKT: "+(p.quantity()==null?"не уточнён":p.quantity())+". Характеристики и ссылки — в карточке.";}
-                    case "analogs" -> {data=analogs.find(productId(action));answer="Кандидаты подбираются по характеристикам. Проверьте объяснение и ограничения.";}
+                    case "product" -> {var p=catalog.get(productId(action));data=p;answer=p.name()+". Цена: "+(p.price()==null?"не уточнена":p.price())+". Остаток по данным EKT: "+(p.quantity()==null?"не уточнён":p.quantity())+". Характеристики и ссылки — в карточке." + (p.warnings().isEmpty()?"":" Предупреждение: "+String.join(" ",p.warnings()));}
+                    case "analogs" -> {
+                        var result=analogs.find(productId(action));data=result;
+                        answer=result.get("message").toString();
+                    }
                     case "terms" -> {data=terms.get();answer=terms.get().path("verified").asBoolean()?"Условия покупки приведены в ответе из настроенного источника.":"Условия оплаты, доставки и минимальной партии пока не уточнены. Обратитесь к менеджеру EKT.";}
                     case "propose" -> {if(action.quantity()==null)throw conflict("QUANTITY_REQUIRED");data=cart.create(session,messageId,productId(action),new BigDecimal(action.quantity()));answer="Проверьте товар, количество и цену. Для добавления подтвердите предложение кнопкой или напишите «да, добавь». Корзина пока не изменена.";}
                     default -> {data=Map.of();answer="Уточните артикул, название товара или вопрос об условиях покупки.";}

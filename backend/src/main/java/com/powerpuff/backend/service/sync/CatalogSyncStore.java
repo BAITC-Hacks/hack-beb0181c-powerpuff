@@ -43,8 +43,12 @@ public class CatalogSyncStore {
         db.update("INSERT INTO catalog_sync_pages(run_id,page,fingerprint) VALUES (?,?,?)",run,page,hash);
         db.update("UPDATE catalog_sync_runs SET next_page=?, updated_at=CURRENT_TIMESTAMP WHERE id=?",page+1,run);
     }
-    public void listComplete(long id) {
-        db.update("UPDATE catalog_sync_runs SET list_complete=TRUE,updated_at=CURRENT_TIMESTAMP WHERE id=?",id);
+    public void listComplete(long id) { listComplete(id,"EMPTY_PAGE"); }
+    public void listComplete(long id,String condition) {
+        db.update("UPDATE catalog_sync_runs SET list_complete=TRUE,end_condition=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",condition,id);
+    }
+    public boolean matchesPage(long run,int page,String fingerprint) {
+        return db.queryForObject("SELECT COUNT(*) FROM catalog_sync_pages WHERE run_id=? AND page=? AND fingerprint=?",Long.class,run,page,fingerprint)>0;
     }
     public List<Long> pending(long id, long after, int limit) {
         return db.queryForList("""
@@ -103,6 +107,8 @@ public class CatalogSyncStore {
         run.put("products",db.queryForObject("SELECT COUNT(*) FROM catalog_sync_products WHERE run_id=?",Long.class,id));
         run.put("detailsComplete",db.queryForObject("SELECT COUNT(*) FROM catalog_sync_products WHERE run_id=? AND detail_status='COMPLETE'",Long.class,id));
         run.put("errors",db.queryForObject("SELECT COUNT(*) FROM catalog_sync_products WHERE run_id=? AND detail_status='FAILED'",Long.class,id));
+        run.put("detailsPending",remaining(id));
+        run.put("complete","COMPLETE".equals(run.get("status")) && Boolean.TRUE.equals(run.get("list_complete")) && remaining(id)==0);
         result.put("run",run);
         return result;
     }

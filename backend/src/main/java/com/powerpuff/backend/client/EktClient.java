@@ -79,7 +79,7 @@ public class EktClient {
         }
         throw new IllegalStateException("Unreachable");
     }
-    private boolean attemptRetryable(int status) { return status == 502 || status == 503 || status == 504; }
+    private boolean attemptRetryable(int status) { return status == 500 || status == 502 || status == 503 || status == 504; }
     private boolean isTimeout(Throwable t) {
         for (; t != null; t = t.getCause())
             if (t instanceof HttpTimeoutException || t instanceof SocketTimeoutException) return true;

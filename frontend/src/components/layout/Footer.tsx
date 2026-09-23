@@ -1,3 +1,4 @@
+import { WhatsAppButton } from "./WhatsAppButton";
 import { useState, type FormEvent } from "react";
 import { CATEGORIES, FOOTER_COLUMNS, SUBSCRIBER_TYPES } from "../../data/home";
 import "./Footer.css";
@@ -52,6 +53,7 @@ export function Footer() {
 
         <div className="footer__middle">
           <div className="footer__payments">
+            <WhatsAppButton />
             <img src="/images/payments/cloudpayments.jpg" alt="Cloudpayments" />
             <img src="/images/payments/payment-2.jpg" alt="Способы оплаты" />
           </div>

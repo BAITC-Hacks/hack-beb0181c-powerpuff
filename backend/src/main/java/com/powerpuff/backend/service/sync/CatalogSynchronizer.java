@@ -14,6 +14,8 @@ public class CatalogSynchronizer {
     private final DataSource dataSource;
     private final EktClient client;
     private final CatalogSyncStore store;
+    @org.springframework.beans.factory.annotation.Value("${catalog.sync.accept-short-page-wrap:false}")
+    private boolean acceptShortPageWrap;
     public CatalogSynchronizer(DataSource dataSource,EktClient client,CatalogSyncStore store) {
         this.dataSource=dataSource; this.client=client; this.store=store;
     }
@@ -30,6 +32,10 @@ public class CatalogSynchronizer {
             finally { try(var stmt=lock.createStatement()) { stmt.execute("SELECT pg_advisory_unlock(5152912026)"); } }
         }
     }
+    private String fingerprint(com.powerpuff.backend.client.EktDtos.Page page) throws Exception {
+        String ids=page.items().stream().map(p->p.id().toString()).sorted().reduce("",(a,b)->a+","+b);
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ids.getBytes(StandardCharsets.UTF_8)));
+    }
     private long run(boolean resume,int maxPages,int maxDetails,long delay) throws Exception {
         var run=store.start(resume);
         long id=run.id();
@@ -39,9 +45,21 @@ public class CatalogSynchronizer {
                     int page=store.load(id).nextPage();
                     var response=client.getProducts(page);
                     if(response.items().isEmpty()) { store.listComplete(id); break; }
-                    String ids=response.items().stream().map(p->p.id().toString()).sorted().reduce("",(a,b)->a+","+b);
-                    String hash=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ids.getBytes(StandardCharsets.UTF_8)));
-                    if(store.seen(id,hash)) { store.state(id,"STOPPED","REPEATED_PAGE"); return id; }
+                    String hash=fingerprint(response);
+                    if(store.seen(id,hash)) {
+                        // Opt-in for the observed EKT behaviour: a partial final page followed by page 1.
+                        // An arbitrary repeat, a changed previous page, or a full previous page never completes the list.
+                        if(acceptShortPageWrap && page>2 && store.matchesPage(id,1,hash)) {
+                            Thread.sleep(delay);
+                            var previous=client.getProducts(page-1);
+                            if(!previous.items().isEmpty() && previous.items().size()<previous.perPage()
+                                    && store.matchesPage(id,page-1,fingerprint(previous))) {
+                                store.listComplete(id,"WRAP_AFTER_VERIFIED_SHORT_PAGE");
+                                break;
+                            }
+                        }
+                        store.state(id,"STOPPED","REPEATED_PAGE"); return id;
+                    }
                     store.page(id,page,hash,response.items());
                     Thread.sleep(delay);
                 }

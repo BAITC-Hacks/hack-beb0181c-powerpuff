@@ -1,25 +1,12 @@
-# API
-fastapi>=0.115
-uvicorn[standard]>=0.30
-pydantic>=2.7
-python-dotenv>=1.0
-
-# ML / данные
-numpy>=1.26
-pandas>=2.2
-scikit-learn>=1.5
-joblib>=1.4
-
-# Ноутбуки и графики
-jupyter>=1.0
-matplotlib>=3.8
-
-# Тесты
-pytest>=8.0
-httpx>=0.27
-
-# Раскомментируйте по необходимости:
-# torch
-# transformers
-# anthropic
-# openai
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+pydantic>=2.7,<3
+python-dotenv>=1,<2
+httpx>=0.27,<1
+requests>=2.32,<3
+numpy>=1.26,<3
+sentence-transformers>=3,<6
+transformers>=4.41,<5
+faiss-cpu>=1.9,<2
+rapidfuzz>=3.9,<4
+pytest>=8,<10

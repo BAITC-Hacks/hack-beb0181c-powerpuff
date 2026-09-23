@@ -272,7 +272,7 @@
             "exec": [
               "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
               "const b=pm.response.json();",
-              "pm.test.skip('ИЗВЕСТНЫЙ ДЕФЕКТ: конфликт 160/250 А не попал в warnings',()=>{});"
+              "pm.test('Конфликт 160/250 А обнаружен и источники сохранены',()=>{pm.expect(b.warnings).to.include('NOMINAL_CURRENT_CONFLICT');pm.expect(b.product.characteristicConflicts[0].evidence.map(x=>x.source)).to.include('properties.NOMINALNYY_TOK');});"
             ]
           }
         }
@@ -350,7 +350,8 @@
             "exec": [
               "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
               "const b=pm.response.json();",
-              "pm.test('LLM не выдумала замену',()=>{pm.expect(b.data.items).to.have.lengthOf(0);pm.expect(b.data.message).to.be.a('string').that.is.not.empty;});"
+              "pm.test('LLM не выдумала замену',()=>{pm.expect(b.data.items).to.have.lengthOf(0);pm.expect(b.data.message).to.be.a('string').that.is.not.empty;});",
+              "pm.test('Причина есть в основном тексте',()=>{pm.expect(b.text).to.include('Товар отсутствует');pm.expect(b.text).to.include('Подтверждённых аналогов не найдено');pm.expect(b.text).to.include('менеджера');});"
             ]
           }
         }

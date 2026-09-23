@@ -54,15 +54,16 @@ class EktClientTest {
             .andRespond(withSuccess("{\"page\":3,\"per_page\":20,\"count\":0,\"items\":[]}", MediaType.APPLICATION_JSON));
         assertThat(client.getProducts(3).items()).isEmpty();
     }
-    @ParameterizedTest @ValueSource(ints = {401,403,404,429,500,302})
+    @ParameterizedTest @ValueSource(ints = {401,403,404,429,302})
     void errorsAreSanitizedWithoutRetries(int status) {
         server.expect(requestTo("https://ekt.kz/api/products/detail?id=1"))
                 .andRespond(withStatus(HttpStatus.valueOf(status)).body("upstream-secret"));
         assertThatThrownBy(() -> client.getProduct(1)).isInstanceOf(EktException.class)
                 .hasMessageNotContaining("upstream-secret");
     }
-    @Test void temporaryFailureRetriesOnce() {
-        server.expect(requestTo("https://ekt.kz/api/products/detail?id=1")).andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+    @ParameterizedTest @ValueSource(ints = {500,502,503,504})
+    void temporaryFailureRetriesOnce(int status) {
+        server.expect(requestTo("https://ekt.kz/api/products/detail?id=1")).andRespond(withStatus(HttpStatus.valueOf(status)));
         server.expect(requestTo("https://ekt.kz/api/products/detail?id=1"))
                 .andRespond(withSuccess("{\"id\":1,\"name\":\"Example\"}", MediaType.APPLICATION_JSON));
         assertThat(client.getProduct(1).id()).isEqualTo(1);

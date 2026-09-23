@@ -1,14 +1,17 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
   plugins: [react()],
   server: {
     port: 5173,
-    // Все запросы на /api идут на Spring Boot — CORS в dev не нужен
+    // Proxy preserves the browser origin; allow that origin in backend CORS.
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': env.BACKEND_PROXY_TARGET || 'http://localhost:8080',
     },
   },
+  };
 })

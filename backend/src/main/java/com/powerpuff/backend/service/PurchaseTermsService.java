@@ -18,7 +18,7 @@ public class PurchaseTermsService {
             if(Files.size(p)>65536)throw new IllegalArgumentException();
             var terms=json.readTree(Files.readString(p));
             if(!terms.path("verified").asBoolean() || terms.path("source").asText().isBlank())throw new IllegalArgumentException();
-            for(String field:new String[]{"payment","delivery","minimumOrder"})if(!terms.path(field).isTextual())throw new IllegalArgumentException();
+            for(String field:new String[]{"payment","delivery","minimumOrder"})if(!terms.path(field).isTextual() || terms.path(field).asText().isBlank())throw new IllegalArgumentException();
             return terms;
         }catch(Exception ex){throw new com.powerpuff.backend.commerce.BusinessException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,"TERMS_INVALID","Purchase terms configuration is invalid");}
     }

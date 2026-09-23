@@ -771,6 +771,87 @@
           }
         }
       ]
+    },
+    {
+      "name": "20. Регрессия: конфликт 160/250 А",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/catalog/products/515291",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('Сохранены значения и предупреждение',()=>{pm.expect(b.warnings).to.include('NOMINAL_CURRENT_CONFLICT');pm.expect(b.product.properties.NOMINALNYY_TOK).to.equal('250 А');pm.expect(b.product.characteristicConflicts[0].evidence.map(x=>Number(x.normalizedValue))).to.include.members([160,250]);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Эквивалентные значения тока без ложного конфликта",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/products/33703",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200));",
+              "const b=pm.response.json();",
+              "pm.test('У реальной карточки нет конфликта тока',()=>{pm.expect(b.name).to.include('20А');pm.expect(b.properties.NOMINALNYY_TOK.replace(/\\s/g,'')).to.equal('20А');pm.expect(b.characteristicConflicts).to.have.lengthOf(0);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Предупреждение в тексте чата",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/chat",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"messageId\": \"{{$guid}}\", \"text\": \"Покажи карточку товара ID 515291 и его характеристики.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 или явное отсутствие LLM в необязательном режиме',()=>pm.expect(pm.response.code===200 || (pm.response.code===503 && pm.response.json().code==='LLM_NOT_CONFIGURED' && String(pm.variables.get('requireLlm'))!=='true')).to.equal(true));",
+              "const b=pm.response.json();",
+              "if(pm.response.code===503 && b.code==='LLM_NOT_CONFIGURED' && String(pm.variables.get('requireLlm'))!=='true'){pm.test.skip('LLM не настроена',()=>{});}else{pm.test('Основной текст содержит конфликт',()=>{pm.expect(b.text).to.include('Расхождение');pm.expect(b.text).to.include('250');pm.expect(b.text).to.include('160');});}"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

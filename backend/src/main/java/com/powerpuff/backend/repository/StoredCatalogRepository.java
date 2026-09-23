@@ -29,14 +29,7 @@ public class StoredCatalogRepository {
             var warnings=new ArrayList<String>();
             if(r.getTimestamp("detail_updated_at")==null) warnings.add("DETAILS_NOT_LOADED");
             if(r.getString("detail_error")!=null) warnings.add("DETAIL_REFRESH_FAILED");
-            if(properties!=null) {
-                var nameCurrent=Pattern.compile("(?i)(\\d+(?:[.,]\\d+)?)\\s*[аa](?![\\p{L}])").matcher(product.name());
-                var propertyCurrent=Pattern.compile("(\\d+(?:[.,]\\d+)?)").matcher(properties.path("NOMINALNYY_TOK").asText(""));
-                if(nameCurrent.find() && propertyCurrent.find()
-                        && new java.math.BigDecimal(nameCurrent.group(1).replace(',','.')).compareTo(
-                            new java.math.BigDecimal(propertyCurrent.group(1).replace(',','.')))!=0)
-                    warnings.add("NOMINAL_CURRENT_CONFLICT");
-            }
+            product.characteristicConflicts().forEach(c -> warnings.add(c.code()));
             return new StoredProductResponse(product,
                     r.getTimestamp("list_updated_at")==null?null:r.getTimestamp("list_updated_at").toInstant(),
                     r.getTimestamp("detail_updated_at")==null?null:r.getTimestamp("detail_updated_at").toInstant(),r.getString("detail_error"),warnings);

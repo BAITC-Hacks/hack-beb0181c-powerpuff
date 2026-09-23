@@ -1,0 +1,684 @@
+{
+  "info": {
+    "name": "EKT — редактирование корзины без LLM",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Реальные маршруты, только новая локальная сессия. Для productId нужны цена, известная кратность и остаток >=4 кратностей. При изменении цены Runner останавливается: новое предложение нельзя подтверждать автоматически. Недоступность EKT и параллельные операции проверены отдельно backend-тестами."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "productId",
+      "value": "515291"
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "strangerSessionId",
+      "value": ""
+    },
+    {
+      "key": "proposalId",
+      "value": ""
+    },
+    {
+      "key": "revision",
+      "value": ""
+    },
+    {
+      "key": "cartVersion",
+      "value": ""
+    },
+    {
+      "key": "step",
+      "value": ""
+    },
+    {
+      "key": "initial",
+      "value": ""
+    },
+    {
+      "key": "target",
+      "value": ""
+    },
+    {
+      "key": "excess",
+      "value": ""
+    },
+    {
+      "key": "editRequestId",
+      "value": ""
+    },
+    {
+      "key": "editVersion",
+      "value": ""
+    },
+    {
+      "key": "staleId",
+      "value": ""
+    },
+    {
+      "key": "staleRevision",
+      "value": ""
+    },
+    {
+      "key": "deleteId",
+      "value": ""
+    },
+    {
+      "key": "deleteVersion",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Новая сессия",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/session"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.collectionVariables.set('sessionId',r.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Свежая карточка — подготовка 2 → 3 кратностей",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/products/{{productId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "const m=Number(String(r.properties?.KRATNOST_MIN||'').replace(',','.')); const good=Number.isFinite(m)&&m>0&&r.price!=null&&r.quantity>=4*m; pm.test('Есть цена, известная кратность и остаток минимум 4 кратности',()=>pm.expect(good).to.eql(true)); if(!good) pm.execution.setNextRequest(null); pm.collectionVariables.set('step',m);pm.collectionVariables.set('initial',2*m);pm.collectionVariables.set('target',3*m);pm.collectionVariables.set('excess',(Math.floor(r.quantity/m)+1)*m);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Предложение добавить",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"productId\":{{productId}},\"quantity\":{{initial}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.collectionVariables.set('proposalId',r.id);pm.collectionVariables.set('revision',r.revision);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. До подтверждения пусто",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Предложение не меняет корзину',()=>pm.expect(r.items).to.have.length(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Явное подтверждение добавления",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals/{{proposalId}}/confirm",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"revision\":{{revision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "if(r.requiresConfirmation){pm.collectionVariables.set('revision',r.proposal.revision);pm.execution.setNextRequest(null);}pm.test('Добавлено; при изменении цены нужно отдельное подтверждение',()=>pm.expect(r.added).to.eql(true));pm.collectionVariables.set('cartVersion',r.cart.version);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Метаданные и сумма корзины",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Карточка правильного productId и итог backend',()=>{pm.expect(r.items[0].productId).to.eql(Number(pm.collectionVariables.get('productId')));pm.expect(r.items[0]).to.have.keys('productId','name','article','image','quantity','price','subtotal','orderMultiple');pm.expect(r.total).to.eql(r.items[0].subtotal);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Применить целевое количество",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{editRequestId}}\",\"quantity\":{{target}},\"cartVersion\":{{editVersion}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('editRequestId',pm.variables.replaceIn('{{$guid}}'));pm.collectionVariables.set('editVersion',pm.collectionVariables.get('cartVersion'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "if(r.requiresConfirmation){pm.execution.setNextRequest(null);}pm.test('Цена стабильна; иначе подтвердите новое предложение вручную',()=>pm.expect(r.requiresConfirmation).to.eql(false));pm.test('Целевое количество',()=>pm.expect(r.cart.items.find(i=>i.productId===Number(pm.collectionVariables.get('productId'))).quantity).to.eql(Number(pm.collectionVariables.get('target'))));",
+              "pm.collectionVariables.set('cartVersion',r.cart.version);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Точный повтор PUT не прибавляет",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{editRequestId}}\",\"quantity\":{{target}},\"cartVersion\":{{editVersion}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Целевое количество',()=>pm.expect(r.cart.items.find(i=>i.productId===Number(pm.collectionVariables.get('productId'))).quantity).to.eql(Number(pm.collectionVariables.get('target'))));",
+              "pm.collectionVariables.set('cartVersion',r.cart.version);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Ноль не удаляет",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"quantity\":0,\"cartVersion\":{{cartVersion}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Ноль отклонён',()=>pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Сверх остатка",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"quantity\":{{excess}},\"cartVersion\":{{cartVersion}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Превышение остатка',()=>{pm.response.to.have.status(409);pm.expect(pm.response.json().code).to.eql('INSUFFICIENT_STOCK');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Другая сессия",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/session"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.collectionVariables.set('strangerSessionId',r.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Другая сессия не изменяет чужую позицию",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{strangerSessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"quantity\":{{target}},\"cartVersion\":0}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Нет чужой позиции',()=>pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Другая сессия не удаляет чужую позицию",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{strangerSessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}?requestId={{$guid}}&cartVersion=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Нет чужой позиции',()=>pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Старое неподтверждённое предложение",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"productId\":{{productId}},\"quantity\":{{step}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.collectionVariables.set('staleId',r.id);pm.collectionVariables.set('staleRevision',r.revision);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Уменьшить до одной кратности",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"requestId\":\"{{$guid}}\",\"quantity\":{{step}},\"cartVersion\":{{cartVersion}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Уменьшено',()=>pm.expect(r.cart.items[0].quantity).to.eql(Number(pm.collectionVariables.get('step'))));pm.collectionVariables.set('cartVersion',r.cart.version);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Устаревшее предложение не перезаписывает количество",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/proposals/{{staleId}}/confirm",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"revision\":{{staleRevision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Предложение устарело',()=>{pm.response.to.have.status(409);pm.expect(pm.response.json().code).to.eql('PROPOSAL_STALE');});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Подтверждённое удаление",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}?requestId={{deleteId}}&cartVersion={{deleteVersion}}"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('deleteId',pm.variables.replaceIn('{{$guid}}'));pm.collectionVariables.set('deleteVersion',pm.collectionVariables.get('cartVersion'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Пустая корзина',()=>{pm.expect(r.items).to.have.length(0);pm.expect(r.total).to.eql(0);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Повтор удаления безопасен",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart/items/{{productId}}?requestId={{deleteId}}&cartVersion={{deleteVersion}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('По-прежнему пусто',()=>pm.expect(r.items).to.have.length(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Состояние после повторного чтения",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{sessionId}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cart"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200',()=>pm.response.to.have.status(200)); const r=pm.response.json();",
+              "pm.test('Сохранена пустая корзина',()=>{pm.expect(r.items).to.have.length(0);pm.expect(r.total).to.eql(0);});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
