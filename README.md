@@ -16,7 +16,7 @@ Hackathon team repository for Powerpuff.
 | Backend   | Java 21, Spring Boot 3.5, Spring Data JPA    |
 | Frontend  | React 19, TypeScript, Vite                   |
 | AI / ML   | Python 3.11+, FastAPI, scikit-learn          |
-| База      | H2 (локально) / PostgreSQL (docker compose)  |
+| База      | PostgreSQL (docker compose), H2 только в тестах  |
 
 ## Структура
 
@@ -55,23 +55,32 @@ Hackathon team repository for Powerpuff.
 
 ### 1. Backend
 
-```bash
-cd backend
-mvn spring-boot:run
-```
+Инструкция по основе EKT, настройкам и тестам: [backend/README.md](backend/README.md).
 
-Проверка: http://localhost:8080/api/health → `{"status":"ok"}`
-
-По умолчанию используется H2 в памяти — ничего устанавливать не надо.
-Консоль БД: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:hackdb`, user `sa`).
-
-С PostgreSQL:
+Запустите Docker. Из корня репозитория (если `.env` уже есть, сохраните его):
 
 ```bash
-docker compose up -d
-cd backend
-SPRING_PROFILES_ACTIVE=postgres mvn spring-boot:run
+cp .env.example .env
+# Отредактируйте DB_USERNAME и DB_PASSWORD в .env.
+docker compose up -d --wait db
+docker compose ps db
 ```
+
+Spring Boot запускайте из IDE: импортируйте `backend/pom.xml` как Maven-проект,
+выберите JDK 21 и класс `com.powerpuff.backend.BackendApplication`.
+В **Environment variables** конфигурации запуска укажите `DB_URL`, `DB_USERNAME`
+и `DB_PASSWORD` из `.env`. JDBC URL: `jdbc:postgresql://localhost:5432/hackdb`.
+Дополнительный Spring profile не нужен.
+
+Docker Compose читает `.env` автоматически; Spring Boot и отдельно запущенная IDE
+не получают эти значения автоматически. Пароль задавайте в локальной конфигурации IDE,
+а не в отслеживаемых файлах проекта.
+
+Проверка: http://localhost:8080/api/health → `{"status":"ok"}`.
+Проверка подключения к БД: http://localhost:8080/actuator/health.
+
+Остановка БД с сохранением данных: `docker compose stop db`.
+Подробности и решение проблем: [backend/README.md](backend/README.md).
 
 ### 2. ML-сервис
 

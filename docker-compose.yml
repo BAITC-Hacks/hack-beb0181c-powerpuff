@@ -1,15 +1,20 @@
-# Локальный PostgreSQL: docker compose up -d
+# Только PostgreSQL; Spring Boot запускается из IDE.
 services:
   db:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: hackdb
-      POSTGRES_USER: hack
-      POSTGRES_PASSWORD: hack
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   pgdata:

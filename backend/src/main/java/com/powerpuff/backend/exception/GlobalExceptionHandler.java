@@ -1,24 +1,44 @@
 package com.powerpuff.backend.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
-
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail handleNotFound(NotFoundException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Resource not found");
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
-        ex.getBindingResult().getFieldErrors()
-                .forEach(err -> problem.setProperty(err.getField(), err.getDefaultMessage()));
-        return problem;
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, "Validation failed");
+        Map<String, String> errors = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(e -> errors.putIfAbsent(e.getField(), e.getDefaultMessage()));
+        problem.setProperty("errors", errors);
+        return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        // Не раскрываем исходное тело запроса, сообщения парсера и внутренние значения.
+        if (!(ex instanceof MethodArgumentNotValidException)) {
+            body = ProblemDetail.forStatusAndDetail(status,
+                    status.is5xxServerError() ? "Internal server error" : "Request cannot be processed");
+        }
+        return super.handleExceptionInternal(ex, body, headers, status, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpected(Exception ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
     }
 }

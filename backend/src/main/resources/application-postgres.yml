@@ -1,9 +1,1 @@
-# Запуск: SPRING_PROFILES_ACTIVE=postgres (БД поднимается через docker compose)
-spring:
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/hackdb}
-    username: ${DB_USER:hack}
-    password: ${DB_PASSWORD:hack}
-  h2:
-    console:
-      enabled: false
+# PostgreSQL используется по умолчанию. Профиль сохранён для совместимости.
