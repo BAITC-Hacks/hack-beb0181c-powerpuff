@@ -14,29 +14,36 @@ def parse_query(query):
         "breaking_capacity": None
     }
 
-    if any(x in text for x in [
-        "автоматический выключатель",
-        "автомат",
-        "авт.выкл",
-        "авт выкл"
-    ]):
-        result["product_type"] = "circuit_breaker"
-
-    brands = [
-        "legrand",
-        "schneider",
-        "iek",
-        "abb",
-        "dekraft"
+    product_type_patterns = [
+        r"автоматическ\w*\s+выключател\w*",
+        r"\bавтомат\w*\b",
+        r"\bавт\.?\s*выкл\.?\b",
+        r"\bав\b"
     ]
 
-    for brand in brands:
-        if brand in text:
-            result["brand"] = brand.capitalize()
+    for pattern in product_type_patterns:
+        if re.search(pattern, text):
+            result["product_type"] = "circuit_breaker"
+            break
+
+    brands = {
+        "legrand": "Legrand",
+        "schneider": "Schneider Electric",
+        "schneider electric": "Schneider Electric",
+        "iek": "IEK",
+        "иэк": "IEK",
+        "abb": "ABB",
+        "dekraft": "DEKraft",
+        "chint": "CHINT"
+    }
+
+    for keyword, normalized_brand in brands.items():
+        if keyword in text:
+            result["brand"] = normalized_brand
             break
 
     current_match = re.search(
-        r"(\d+(?:[.,]\d+)?)\s*(?:а|a|ампер)",
+        r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:а|a|ампер(?:а|ов)?)(?![\w])",
         text
     )
 
@@ -45,34 +52,43 @@ def parse_query(query):
             current_match.group(1).replace(",", ".")
         )
 
-    pole_patterns = [
-        (r"\b([1-4])\s*(?:p|п)\b", 1),
-        (r"\b([1-4])\s*(?:ф|фазы|фазный|фазной)\b", 1)
-    ]
+    pole_match = re.search(
+        r"\b([1-4])\s*(?:p|п)\b",
+        text
+    )
 
-    for pattern, _ in pole_patterns:
-        match = re.search(pattern, text)
+    if pole_match:
+        result["poles"] = int(pole_match.group(1))
 
-        if match:
-            result["poles"] = int(match.group(1))
-            break
+    if result["poles"] is None:
+        phase_match = re.search(
+            r"\b([1-4])\s*ф\b",
+            text
+        )
 
-    words = {
-        "однофазный": 1,
-        "двухфазный": 2,
-        "трехфазный": 3,
-        "трёхфазный": 3,
-        "четырехполюсный": 4,
-        "четырёхполюсный": 4
-    }
+        if phase_match:
+            result["poles"] = int(phase_match.group(1))
 
-    for word, value in words.items():
-        if word in text:
-            result["poles"] = value
-            break
+    if result["poles"] is None:
+        if re.search(r"тр[её]хфаз", text):
+            result["poles"] = 3
+        elif re.search(r"двухфаз", text):
+            result["poles"] = 2
+        elif re.search(r"однофаз", text):
+            result["poles"] = 1
+
+    if result["poles"] is None:
+        if re.search(r"четыр[её]хполюс", text):
+            result["poles"] = 4
+        elif re.search(r"тр[её]хполюс", text):
+            result["poles"] = 3
+        elif re.search(r"двухполюс", text):
+            result["poles"] = 2
+        elif re.search(r"однополюс", text):
+            result["poles"] = 1
 
     voltage_match = re.search(
-        r"(\d+(?:[.,]\d+)?)\s*(?:в|v|вольт)",
+        r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:в|v|вольт(?:а|ов)?)(?![\w])",
         text
     )
 
@@ -82,7 +98,7 @@ def parse_query(query):
         )
 
     capacity_match = re.search(
-        r"(\d+(?:[.,]\d+)?)\s*(?:ka|ка|кa)",
+        r"(?<![\w])(\d+(?:[.,]\d+)?)\s*(?:ka|ка|кa|кa)(?![\w])",
         text
     )
 
@@ -94,10 +110,11 @@ def parse_query(query):
     return result
 
 
-while True:
-    query = input("Query: ")
+if __name__ == "__main__":
+    while True:
+        query = input("Query: ")
 
-    if query.lower() == "exit":
-        break
+        if query.lower().strip() == "exit":
+            break
 
-    print(parse_query(query))
+        print(parse_query(query))
